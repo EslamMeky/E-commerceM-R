@@ -10,4 +10,5 @@ return [
     'updated'=>'Updated Successfully',
     'saved'=>'Saved Successfully',
     'deleted'=>'deleted Successfully',
+    'out_of_stock'=>'Out Of Stock',
 ];

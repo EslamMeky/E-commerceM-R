@@ -26,6 +26,7 @@ class ProductController extends Controller
                     $otherImagesPaths[] = uploadImage('OtherImagesProducts', $image);
                 }
             }
+
             Products::create([
                 'category_id' => $request->category_id,
                 'name_ar' => $request->name_ar,
@@ -40,6 +41,7 @@ class ProductController extends Controller
                 'sizes' => json_encode($request->sizes), // تحويل المصفوفة إلى JSON
                 'stock' => $request->stock,
                 'barcode' => $request->barcode,
+                'out_of_stock' => $request->stock <= 0 ? 1 : 0,
             ]);
 
             return $this->ReturnSuccess(200, __('message.saved'));
@@ -52,7 +54,7 @@ class ProductController extends Controller
     {
         try {
             $locale = app()->getLocale();
-            $product = Products::with(['category'])->select([
+            $product = Products::with(['category','reviews'])->select([
                 'id',
                 'category_id',
                 'name_' . $locale . ' as name',
@@ -64,6 +66,7 @@ class ProductController extends Controller
                 'colors',
                 'sizes',
                 'stock',
+                'out_of_stock',
                 'created_at',
                 'updated_at'
             ])->where('name_' . $locale, $name_product)->first();
@@ -81,8 +84,18 @@ class ProductController extends Controller
             $product->colors = $product->colors; // الألوان كـ Array
             $product->sizes = $product->sizes; // المقاسات كـ Array
 
+            $reviewCount = $product->reviews()->count();
+            $averageRating = $product->reviews->isNotEmpty()
+                ? round($product->reviews()->avg('rating'), 2)
+                : 0;
 
-            return $this->ReturnData('product', $product, '');
+            $data = [
+                'product' => $product,
+                'average_rating' => $averageRating,
+                'review_count' => $reviewCount, // عدد المراجعات
+            ];
+
+            return $this->ReturnData('data', $data, '');
         } catch (\Exception $ex) {
             return $this->ReturnError($ex->getCode(), $ex->getMessage());
 
@@ -139,10 +152,15 @@ class ProductController extends Controller
             }
 
             // جلب المنتجات بناءً على الاستعلام
-            $products = $query->latest()->paginate(10);
+            $products = $query->latest()->paginate(pag);
 
-            // جلب المنتجات ذات الصلة لكل منتج
             foreach ($products as $product) {
+                // حساب التقييمات
+                $reviewCount = $product->reviews()->count();
+                $product->average_rating = $reviewCount > 0 ? round($product->reviews()->avg('rating'), 2) : 0;
+                $product->review_count = $reviewCount;
+
+                // إضافة المنتجات ذات الصلة
                 $relatedProducts = Products::where('category_id', $product->category_id)
                     ->where('id', '!=', $product->id) // استثناء المنتج نفسه
                     ->Selection()
@@ -177,6 +195,7 @@ class ProductController extends Controller
             }
 
             return $this->ReturnData('products', $products, '');
+
         } catch (\Exception $ex) {
             return $this->ReturnError($ex->getCode(), $ex->getMessage());
         }
@@ -222,6 +241,7 @@ class ProductController extends Controller
                 'sizes' => 'required',
                 'stock' => 'required',
                 'barcode' => 'required',
+//                'out_of_stock'=>'required'
             ];
 
             $validator = Validator::make($request->all(), $rules);
@@ -233,12 +253,12 @@ class ProductController extends Controller
             // جلب المنتج بناءً على المعرف
             $product = Products::find($product_id);
 
-            // إذا لم يتم العثور على المنتج
+
             if (!$product) {
                 return $this->ReturnError(404, __('message.notFound'));
             }
 
-            // تحديث الصورة الرئيسية (image) إذا تم رفع صورة جديدة
+
             if ($request->hasFile('image')) {
                 // حذف الصورة القديمة إذا كانت موجودة
                 $photoPath = parse_url($product->image, PHP_URL_PATH);
@@ -278,6 +298,7 @@ class ProductController extends Controller
                 'sizes' => json_encode($request->sizes), // تحويل المصفوفة إلى JSON
                 'stock' => $request->stock,
                 'barcode' => $request->barcode,
+                'out_of_stock' => $request->stock <= 0 ? 1 : 0,
             ]);
 
             return $this->ReturnSuccess(200, __('message.updated'));
@@ -488,7 +509,32 @@ class ProductController extends Controller
     }
 
 
+    public function showOutOfStock()
+    {
+        try {
 
+
+            $products = Products::with(['category' ])
+                ->where('stock', '<=', 0)
+                ->latest()->paginate(pag);
+
+            // تحويل الصور الإضافية والألوان والمقاسات إلى Arrays لكل منتج
+            foreach ($products as $product) {
+                // إذا كانت الصور الإضافية موجودة، تحويلها من JSON إلى Array
+                if ($product->OtherImage) {
+                    $product->OtherImage = $product->OtherImage; // إذا كانت مخزنة كـ Array
+                }
+
+                // تحويل الألوان والمقاسات إلى Arrays
+                $product->colors = $product->colors; // الألوان كـ Array
+                $product->sizes = $product->sizes; // المقاسات كـ Array
+            }
+
+            return $this->ReturnData('products', $products, '');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
 
 
 }

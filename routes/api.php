@@ -5,8 +5,10 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdvertiseLandController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BannerLandController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ReviewsController;
 use App\Http\Controllers\Api\ServicesLandController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -67,6 +69,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::get('singleProduct/{product_id}',[ProductController::class,'singleProduct']);
             Route::get('allProducts',[ProductController::class,'allProducts']);
             Route::get('showAll',[ProductController::class,'showAll']);
+            Route::get('showOutOfStock',[ProductController::class,'showOutOfStock']);
             Route::post('update/{product_id}',[ProductController::class,'update']);
             Route::get('delete/{product_id}',[ProductController::class,'delete']);
             Route::get('deleteAll',[ProductController::class,'deleteAll']);
@@ -131,6 +134,26 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         Route::get('showAll',[AdminController::class,'showAll']);
         Route::get('showByType/{type}',[AdminController::class,'showByType']);
 
+        //////////////////////   reviews /////
+        Route::group(['prefix'=>'review'],function (){
+            Route::post('store/{product_id}', [ReviewsController::class, 'store'])->middleware('auth:api');
+            Route::get('show/{product_id}', [ReviewsController::class, 'show']);
+            Route::get('showAll', [ReviewsController::class, 'showAll']);
+
+        });
+
+        ////////////////  cart   ///////
+        Route::group(['prefix'=>'cart','middleware'=>'auth:api'],function (){
+
+            Route::post('addToCart/{product_id}', [CartController::class, 'addToCart']);
+
+            Route::get('viewCart', [CartController::class, 'viewCart']);
+
+            Route::post('updateQuantity', [CartController::class, 'updateQuantity']);
+
+            Route::get('removeFromCart', [CartController::class, 'removeFromCart']);
+
+        });
 
 
 

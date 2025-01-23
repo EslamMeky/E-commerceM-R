@@ -24,6 +24,7 @@ class Products extends Model
         'sizes',
         'stock',
         'barcode',
+        'out_of_stock',
         'created_at',
         'updated_at'
     ];
@@ -45,6 +46,7 @@ class Products extends Model
             'sizes',
             'stock',
             'barcode',
+            'out_of_stock',
             'created_at',
             'updated_at'
         ]);
@@ -93,4 +95,10 @@ class Products extends Model
     {
      return $this->belongsTo(Category::class,'category_id');
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class,'product_id');
+    }
+
 }

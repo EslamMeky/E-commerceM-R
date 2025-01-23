@@ -28,6 +28,7 @@ return new class extends Migration
             $table->json('sizes');
             $table->integer('stock');
             $table->integer('barcode')->nullable();
+            $table->tinyInteger('out_of_stock')->default(0);
             $table->timestamps();
 
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
