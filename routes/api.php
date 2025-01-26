@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BannerLandController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\PaymobController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewsController;
 use App\Http\Controllers\Api\ServicesLandController;
@@ -66,7 +67,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         //////////////////// products ///////////
         Route::group(['prefix'=>'product'],function (){
             Route::post('save',[ProductController::class,'save']);
-            Route::get('singleProduct/{product_id}',[ProductController::class,'singleProduct']);
+            Route::get('singleProduct/{product_id}',[ProductController::class,'singleProductWithRelated']);
             Route::get('allProducts',[ProductController::class,'allProducts']);
             Route::get('showAll',[ProductController::class,'showAll']);
             Route::get('showOutOfStock',[ProductController::class,'showOutOfStock']);
@@ -155,6 +156,13 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
 
         });
 
+        //////////////////////////  paymob  ///////
+        Route::group(['prefix'=>'payment'],function (){
+            Route::post('/generateToken', [PaymobController::class, 'generateToken']);
+            Route::post('/sendPayment', [PaymobController::class, 'sendPayment']);
+            Route::match(['GET','POST'],'/callback', [PaymobController::class, 'callBack'])->withoutMiddleware(['check.pass','check.lang']);
+
+        });
 
 
 

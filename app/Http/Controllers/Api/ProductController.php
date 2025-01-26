@@ -50,11 +50,65 @@ class ProductController extends Controller
         }
     }
 
-    public function singleProduct($name_product)
+//    public function singleProduct($name_product)
+//    {
+//        try {
+//            $locale = app()->getLocale();
+//            $product = Products::with(['category','reviews'])->select([
+//                'id',
+//                'category_id',
+//                'name_' . $locale . ' as name',
+//                'image',
+//                'OtherImage',
+//                'desc_' . $locale . ' as desc',
+//                'main_price',
+//                'price_discount',
+//                'colors',
+//                'sizes',
+//                'stock',
+//                'out_of_stock',
+//                'created_at',
+//                'updated_at'
+//            ])->where('name_' . $locale, $name_product)->first();
+//
+//            // إذا لم يتم العثور على المنتج
+//            if (!$product) {
+//                return $this->ReturnError(404, __('message.notFound'));
+//            }
+//            // إذا كانت الصور الإضافية موجودة، تحويلها من JSON إلى Array
+//            if ($product->OtherImage) {
+//                $product->OtherImage = $product->OtherImage; // إذا كانت مخزنة كـ Array
+//            }
+//
+//            // إرجاع المنتج مع الألوان والمقاسات كـ Arrays
+//            $product->colors = $product->colors; // الألوان كـ Array
+//            $product->sizes = $product->sizes; // المقاسات كـ Array
+//
+//            $reviewCount = $product->reviews()->count();
+//            $averageRating = $product->reviews->isNotEmpty()
+//                ? round($product->reviews()->avg('rating'), 2)
+//                : 0;
+//
+//            $data = [
+//                'product' => $product,
+//                'average_rating' => $averageRating,
+//                'review_count' => $reviewCount, // عدد المراجعات
+//            ];
+//
+//            return $this->ReturnData('data', $data, '');
+//        } catch (\Exception $ex) {
+//            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+//
+//        }
+//
+//    }
+    public function singleProductWithRelated($name_product)
     {
         try {
             $locale = app()->getLocale();
-            $product = Products::with(['category','reviews'])->select([
+
+            // جلب المنتج الرئيسي
+            $product = Products::with(['category', 'reviews'])->select([
                 'id',
                 'category_id',
                 'name_' . $locale . ' as name',
@@ -75,32 +129,71 @@ class ProductController extends Controller
             if (!$product) {
                 return $this->ReturnError(404, __('message.notFound'));
             }
-            // إذا كانت الصور الإضافية موجودة، تحويلها من JSON إلى Array
+
+            // معالجة الصور الإضافية
             if ($product->OtherImage) {
                 $product->OtherImage = $product->OtherImage; // إذا كانت مخزنة كـ Array
             }
 
-            // إرجاع المنتج مع الألوان والمقاسات كـ Arrays
-            $product->colors = $product->colors; // الألوان كـ Array
-            $product->sizes = $product->sizes; // المقاسات كـ Array
+            // معالجة الألوان والمقاسات
+            $product->colors = $product->colors;
+            $product->sizes = $product->sizes;
 
+            // حساب متوسط التقييم وعدد المراجعات
             $reviewCount = $product->reviews()->count();
             $averageRating = $product->reviews->isNotEmpty()
                 ? round($product->reviews()->avg('rating'), 2)
                 : 0;
 
+            // جلب المنتجات ذات الصلة
+            $relatedProducts = Products::where('category_id', $product->category_id)
+                ->where('id', '!=', $product->id) // استثناء المنتج الأساسي
+                ->select([
+                    'id',
+                    'category_id',
+                    'name_' . $locale . ' as name',
+                    'image',
+                    'OtherImage',
+                    'main_price',
+                    'price_discount',
+                    'colors',
+                    'sizes',
+                    'stock',
+                    'out_of_stock',
+                    'created_at',
+                    'updated_at'
+                ])
+                ->latest()
+                ->take(5)
+                ->get();
+
+            // معالجة المنتجات ذات الصلة
+            foreach ($relatedProducts as $relatedProduct) {
+                if ($relatedProduct->OtherImage) {
+                    $relatedProduct->OtherImage = $relatedProduct->OtherImage;
+                }
+
+                if ($relatedProduct->colors) {
+                    $relatedProduct->colors = json_decode($relatedProduct->colors, true);
+                }
+
+                if ($relatedProduct->sizes) {
+                    $relatedProduct->sizes = json_decode($relatedProduct->sizes, true);
+                }
+            }
+
+            // إعداد البيانات للإرجاع
             $data = [
                 'product' => $product,
                 'average_rating' => $averageRating,
-                'review_count' => $reviewCount, // عدد المراجعات
+                'review_count' => $reviewCount,
+                'related_products' => $relatedProducts
             ];
 
             return $this->ReturnData('data', $data, '');
         } catch (\Exception $ex) {
             return $this->ReturnError($ex->getCode(), $ex->getMessage());
-
         }
-
     }
 
     public function allProducts(Request $request)

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->integer('otp');
             $table->timestamp('otp_expiry')->nullable();
             $table->string('image')->nullable();
-            $table->bigInteger('code')->nullable();
+            $table->string('code')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

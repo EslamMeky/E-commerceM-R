@@ -55,6 +55,7 @@ class CategoryController extends Controller
         {
             $locale = app()->getLocale();
             $category=Category::select([
+                'id',
                 'name_'.$locale,
                 'image',
                 'created_at',
