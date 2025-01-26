@@ -51,7 +51,7 @@ class Orders extends Model
     }
     public $timestamps=true;
 
-    public function getShipping_dataAttribute($val)
+    public function getShippingDataAttribute($val)
     {
         if (is_array($val)) {
             return $val; // إذا كان الحقل بالفعل مصفوفة، قم بإعادته كما هو

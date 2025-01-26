@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdvertiseLandController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BannerLandController;
+use App\Http\Controllers\Api\CachBackController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\PaymobController;
@@ -161,9 +162,20 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::post('/generateToken', [PaymobController::class, 'generateToken']);
             Route::post('/sendPayment', [PaymobController::class, 'sendPayment']);
             Route::match(['GET','POST'],'/callback', [PaymobController::class, 'callBack'])->withoutMiddleware(['check.pass','check.lang']);
+            Route::get('/showAll', [PaymobController::class, 'showAll']);
+            Route::get('/showByCode/{code}', [PaymobController::class, 'showByCode']);
+            Route::post('/cashOnDelivery', [PaymobController::class, 'cashOnDelivery']);
 
         });
 
+        //////////////////  cash Back /////////////
+        Route::group(['prefix'=>'cashBack'],function (){
+            Route::get('/', [CachBackController::class, 'index']); // عرض جميع السجلات
+            Route::post('/store', [CachBackController::class, 'store']); // إنشاء سجل جديد
+            Route::get('/edit/{id}', [CachBackController::class, 'edit']); // عرض سجل واحد
+            Route::post('/update/{id}', [CachBackController::class, 'update']); // تحديث سجل
+            Route::get('/delete/{id}', [CachBackController::class, 'destroy']); // حذف سجل
+        });
 
 
     });

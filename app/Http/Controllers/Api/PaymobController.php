@@ -204,6 +204,60 @@ class PaymobController extends Controller
         return redirect()->route('payment.failed');
     }
 
+    public function showAll(){
+        try
+        {
+         $orders= Orders::paginate(pag);
+          return $this->ReturnData('orders',$orders,"");
+        }catch (\Exception $ex){
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+    public function showByCode($code){
+        try
+        {
+            $orders= Orders::
+            where('code_user',$code)->paginate(pag);
+            return $this->ReturnData('orders',$orders,"");
+        }catch (\Exception $ex){
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+
+    public function cashOnDelivery(Request $request): JsonResponse
+    {
+        try {
+            // Validate data before saving it
+            $data = $request->all();
+            $data['payment_method'] = 'cash_on_delivery';
+            $data['status'] = 'pending'; // الحالة الافتراضية عند الطلب
+
+            // حفظ الطلب في قاعدة البيانات
+            $order = Orders::create([
+                'transaction_id' => null, // لا يوجد Transaction ID للدفع عند الاستلام
+                'order_id' => uniqid(), // يمكنك استخدام معرف فريد للطلب
+                'user_id' => $data['user_id'],
+                'code_user' => $data['code_user'] ?? null,
+                'type_user' => $data['type_user'] ?? 'guest',
+                'amount_cents' => $data['amount_cents'],
+                'currency' => $data['currency'],
+                'discount' => $data['discount'] ?? 0,
+                'before_discount' => $data['before_discount'] ?? 0,
+                'shipping_data' => json_encode($data['shipping_data']),
+                'items' => json_encode($data['items']),
+                'payment_method' => $data['payment_method'],
+                'status' => $data['status'],
+            ]);
+
+            // إذا أردت إرسال إشعار أو بريد إلكتروني، يمكنك إضافته هنا
+
+            return $this->ReturnSuccess(200,'saved Successfully cash on delivery');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+
+
     public function success()
     {
 
