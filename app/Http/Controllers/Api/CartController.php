@@ -126,28 +126,35 @@ class CartController extends Controller
 
     }
 
-    public function removeFromCart(Request $request)
+    public function removeFromCart($id)
     {
         try {
-            $request->validate([
-                'product_id' => 'required|exists:products,id',
-                'color' => 'required|string|max:255',
-                'size' => 'required|string|max:255',
-            ]);
-
-
-            $cart = Cart::where('user_id', auth()->id())
-                ->where('product_id', $request->product_id)
-                ->where('color', $request->color)
-                ->where('size', $request->size)
-                ->first();
-
-            if ($cart) {
-                $cart->delete();
-               return $this->ReturnSuccess(200,__('message.deleted'));
+//            $request->validate([
+//                'product_id' => 'required|exists:products,id',
+//                'color' => 'required|string|max:255',
+//                'size' => 'required|string|max:255',
+//            ]);
+//
+//
+//            $cart = Cart::where('user_id', auth()->id())
+//                ->where('product_id', $request->product_id)
+//                ->where('color', $request->color)
+//                ->where('size', $request->size)
+//                ->first();
+//
+//            if ($cart) {
+//                $cart->delete();
+//               return $this->ReturnSuccess(200,__('message.deleted'));
+//            }
+//
+//           return $this->ReturnError(404,__('message.notFound'));
+            $cart=Cart::where('id',$id)->first();
+            if (!$cart)
+            {
+                return $this->ReturnError(404,__('message.notFound'));
             }
-
-           return $this->ReturnError(404,__('message.notFound'));
+            $cart->delete();
+            return $this->ReturnSuccess(200,__('message.deleted'));
         }
         catch (\Exception $ex)
         {

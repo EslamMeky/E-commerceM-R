@@ -3,23 +3,35 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ServicesLandRequest;
+use App\Http\Requests\WhyRequest;
 use App\Http\Traits\GeneralTrait;
-use App\Models\ServicesLand;
+use App\Models\Why;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-class ServicesLandController extends Controller
+class WhyController extends Controller
 {
     use GeneralTrait;
-
-    public function save(ServicesLandRequest $request)
+    public function index()
     {
         try
         {
-            $pathImage=uploadImage('Services',$request->image);
-            ServicesLand::create([
+           $why=Why::Selection()->latest()->paginate(pag);
+           return $this->ReturnData('why',$why,"");
+        }
+        catch (\Exception $ex)
+        {
+            return $this->ReturnError($ex->getCode(),$ex->getMessage());
+        }
+    }
+
+    public function save(WhyRequest $request)
+    {
+        try
+        {
+            $pathImage=uploadImage('Why',$request->image);
+            Why::create([
                 'tittle_ar'=>$request->tittle_ar,
                 'tittle_en'=>$request->tittle_en,
                 'desc_ar'=>$request->desc_ar,
@@ -31,31 +43,7 @@ class ServicesLandController extends Controller
         catch (\Exception $ex)
         {
             return $this->ReturnError($ex->getCode(),$ex->getMessage());
-        }
-    }
 
-    public function show()
-    {
-        try
-        {
-            $services=ServicesLand::selection()->latest()->paginate(pag);
-            return $this->ReturnData('services',$services,"");
-        }
-        catch (\Exception $ex)
-        {
-            return $this->ReturnError($ex->getCode(),$ex->getMessage());
-        }
-    }
-    public function showAll()
-    {
-        try
-        {
-            $services=ServicesLand::latest()->paginate(pag);
-            return $this->ReturnData('services',$services,"");
-        }
-        catch (\Exception $ex)
-        {
-            return $this->ReturnError($ex->getCode(),$ex->getMessage());
         }
     }
 
@@ -78,29 +66,29 @@ class ServicesLandController extends Controller
                 return $this->returnValidationError($code, $validator);
             }
 
-            $service = ServicesLand::findOrFail($id);
-            if (!$service)
+            $why = Why::findOrFail($id);
+            if (!$why)
             {
                 return $this->ReturnError('404',__('message.notFound'));
             }
 
             if ($request->hasFile('image')) {
-                $photoPath = parse_url($service->image, PHP_URL_PATH);
+                $photoPath = parse_url($why->image, PHP_URL_PATH);
                 $photoPath = ltrim($photoPath, '/');
                 $oldImagePath = public_path($photoPath);
 
-                if ($service->image && file_exists($oldImagePath)) {
+                if ($why->image && file_exists($oldImagePath)) {
 
                     unlink($oldImagePath);
                 }
-                $pathFile = uploadImage('Services', $request->image);
+                $pathFile = uploadImage('Why', $request->image);
 
-                $service->where('id', $id)->update([
+                $why->where('id', $id)->update([
                     'image' => $pathFile,
                 ]);
             }
             // تحديث السجل
-            $service->update([
+            $why->update([
                 'tittle_ar' => $request->tittle_ar,
                 'tittle_en' => $request->tittle_en,
                 'desc_ar' => $request->desc_ar,
@@ -120,19 +108,19 @@ class ServicesLandController extends Controller
     {
         try
         {
-            $service= ServicesLand::find($id);
-            if (!$service)
+            $why= Why::find($id);
+            if (!$why)
             {
                 return $this->ReturnError(404,__('message.notFound'));
             }
-            if ($service->image != null){
-                $image=Str::after($service->image,'assets/');
+            if ($why->image != null){
+                $image=Str::after($why->image,'assets/');
                 $image=base_path('public/assets/'.$image);
                 unlink($image);
-                $service->delete();
+                $why->delete();
             }
             else
-                $service->delete();
+                $why->delete();
             return $this->ReturnSuccess(200,__('message.deleted'));
 
         }
@@ -141,5 +129,8 @@ class ServicesLandController extends Controller
             return $this->ReturnError($ex->getCode(),$ex->getCode());
         }
     }
+
+
+
 
 }

@@ -8,10 +8,13 @@ use App\Http\Controllers\Api\BannerLandController;
 use App\Http\Controllers\Api\CachBackController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\PaymobController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewsController;
 use App\Http\Controllers\Api\ServicesLandController;
+use App\Http\Controllers\Api\SubscribeController;
+use App\Http\Controllers\Api\WhyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -153,7 +156,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
 
             Route::post('updateQuantity', [CartController::class, 'updateQuantity']);
 
-            Route::get('removeFromCart', [CartController::class, 'removeFromCart']);
+            Route::get('removeFromCart/{id}', [CartController::class, 'removeFromCart']);
 
         });
 
@@ -178,14 +181,31 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         });
 
 
+        //////////////////////////  contact  //////////
+        Route::group(['prefix'=>'contact'],function (){
+            Route::get('/', [ContactController::class, 'index']); // عرض جميع السجلات
+            Route::post('/save', [ContactController::class, 'save']); // إنشاء سجل جديد
+
+        });
+        ///////////////////////// subscribe //////////
+        Route::group(['prefix'=>'subscribe'],function (){
+            Route::get('/', [SubscribeController::class, 'index']); // عرض جميع السجلات
+            Route::post('/save', [SubscribeController::class, 'save']); // إنشاء سجل جديد
+
+        });
+
+        /////////////////   Why section ////////
+
+        Route::group(['prefix'=>'why'],function (){
+            Route::post('save',[WhyController::class,'save']);
+            Route::post('update/{id}',[WhyController::class,'update']);
+            Route::get('/',[WhyController::class,'index']);
+            Route::get('delete/{id}',[WhyController::class,'delete']);
+
+        });
+
     });
 
-    Route::group(['prefix'=>'v1'],function (){
-
-        /////////////////  products //////////////
-//        Route::get('product/allProducts',[ProductController::class,'allProducts']);
-
-    });
 
 });
 
