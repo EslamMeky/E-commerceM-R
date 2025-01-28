@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\GeneralTrait;
 use App\Models\Cashback;
+use App\Models\Orders;
 use Illuminate\Http\Request;
 
 class CachBackController extends Controller
@@ -72,7 +73,7 @@ class CachBackController extends Controller
 
     }
 
-    // حذف سجل
+
     public function destroy($id)
     {
         try {
@@ -86,6 +87,20 @@ class CachBackController extends Controller
 
         }catch (\Exception $ex){
             return $this->ReturnError($ex->getCode(),$ex->getMessage());
+        }
+    }
+
+    public function showCashbackToUser($code ,$user_id)
+    {
+        try
+        {
+          $orders= Orders::where('code_user',$code)->where('user_id','!=', $user_id)->paginate(pag);
+            return $this->ReturnData('orders',$orders,'');
+        }
+        catch (\Exception $ex)
+        {
+            return $this->ReturnError($ex->getCode(),$ex->getMessage());
+
         }
     }
 

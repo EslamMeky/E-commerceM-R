@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -183,6 +184,26 @@ class AdminController extends Controller
         catch (\Exception $ex){
             return $this->ReturnError($ex->getCode(), $ex->getMessage());
 
+        }
+    }
+
+    public function delete($id)
+    {
+        try
+        {
+            $admin= Admin::find($id);
+            if (!$admin)
+            {
+                return $this->ReturnError(404,__('message.notFound'));
+            }
+
+            $admin->delete();
+            return $this->ReturnSuccess(200,__('message.deleted'));
+
+        }
+        catch (\Exception $ex)
+        {
+            return $this->ReturnError($ex->getCode(),$ex->getCode());
         }
     }
 }

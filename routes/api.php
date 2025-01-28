@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CachBackController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\PaymobController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewsController;
@@ -138,6 +139,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         Route::get('singleUser/{id}',[AdminController::class,'singleUser']);
         Route::get('showAll',[AdminController::class,'showAll']);
         Route::get('showByType/{type}',[AdminController::class,'showByType']);
+        Route::get('delete/{id}',[AdminController::class,'delete']);
 
         //////////////////////   reviews /////
         Route::group(['prefix'=>'review'],function (){
@@ -178,6 +180,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::get('/edit/{id}', [CachBackController::class, 'edit']); // عرض سجل واحد
             Route::post('/update/{id}', [CachBackController::class, 'update']); // تحديث سجل
             Route::get('/delete/{id}', [CachBackController::class, 'destroy']); // حذف سجل
+            Route::get('/showCashbackToUser/{code}/{user_id}', [CachBackController::class, 'showCashbackToUser']); // حذف سجل
         });
 
 
@@ -201,6 +204,17 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::post('update/{id}',[WhyController::class,'update']);
             Route::get('/',[WhyController::class,'index']);
             Route::get('delete/{id}',[WhyController::class,'delete']);
+
+        });
+
+
+        /////////////////   Feature section ////////
+
+        Route::group(['prefix'=>'feature'],function (){
+            Route::post('save',[FeatureController::class,'save']);
+            Route::post('update/{id}',[FeatureController::class,'update']);
+            Route::get('/',[FeatureController::class,'index']);
+            Route::get('delete/{id}',[FeatureController::class,'delete']);
 
         });
 
