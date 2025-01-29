@@ -3,60 +3,61 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\FeatureRequest;
+use App\Http\Requests\Contact_usRequest;
 use App\Http\Traits\GeneralTrait;
-use App\Models\Features;
+use App\Models\Contact_us;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-class FeatureController extends Controller
+class ContactUsController extends Controller
 {
     use GeneralTrait;
-    public function index()
-    {
-        try
-        {
-            $feature=Features::Selection()->latest()->paginate(pag);
-            return $this->ReturnData('feature',$feature,"");
-        }
-        catch (\Exception $ex)
-        {
-            return $this->ReturnError($ex->getCode(),$ex->getMessage());
-        }
-    }
 
-    public function showAll()
+    public function save(Contact_usRequest $request)
     {
         try
         {
-            $feature=Features::latest()->paginate(pag);
-            return $this->ReturnData('feature',$feature,"");
-        }
-        catch (\Exception $ex)
-        {
-            return $this->ReturnError($ex->getCode(),$ex->getMessage());
-        }
-    }
 
-    public function save(FeatureRequest $request)
-    {
-        try
-        {
-            $pathImage=uploadImage('Feature',$request->image);
-            Features::create([
+            Contact_us::create([
                 'tittle_ar'=>$request->tittle_ar,
                 'tittle_en'=>$request->tittle_en,
                 'desc_ar'=>$request->desc_ar,
                 'desc_en'=>$request->desc_en,
-                'image'=>$pathImage,
+                'name_btn_ar'=>$request->name_btn_ar,
+                'name_btn_en'=>$request->name_btn_en,
+                'link_btn'=>$request->link_btn,
             ]);
             return $this->ReturnSuccess(200,__('message.saved'));
         }
         catch (\Exception $ex)
         {
             return $this->ReturnError($ex->getCode(),$ex->getMessage());
+        }
+    }
 
+    public function show()
+    {
+        try
+        {
+            $contact=Contact_us::selection()->latest()->paginate(10);
+            return $this->ReturnData('contactUs',$contact,"");
+        }
+        catch (\Exception $ex)
+        {
+            return $this->ReturnError($ex->getCode(),$ex->getMessage());
+        }
+    }
+    public function showAll()
+    {
+        try
+        {
+            $contact=Contact_us::latest()->paginate(pag);
+            return $this->ReturnData('contactUs',$contact,"");
+        }
+        catch (\Exception $ex)
+        {
+            return $this->ReturnError($ex->getCode(),$ex->getMessage());
         }
     }
 
@@ -69,7 +70,9 @@ class FeatureController extends Controller
                 'tittle_en' => 'required',
                 'desc_ar' => 'required',
                 'desc_en' => 'required',
-
+                'name_btn_ar'=>'required',
+                'name_btn_en'=>'required',
+                'link_btn'=>'required',
             ];
 
             $validator = Validator::make($request->all(), $rules);
@@ -79,33 +82,21 @@ class FeatureController extends Controller
                 return $this->returnValidationError($code, $validator);
             }
 
-            $feature = Features::findOrFail($id);
-            if (!$feature)
+            $contact = Contact_us::findOrFail($id);
+            if (!$contact)
             {
                 return $this->ReturnError('404',__('message.notFound'));
             }
 
-            if ($request->hasFile('image')) {
-                $photoPath = parse_url($feature->image, PHP_URL_PATH);
-                $photoPath = ltrim($photoPath, '/');
-                $oldImagePath = public_path($photoPath);
 
-                if ($feature->image && file_exists($oldImagePath)) {
-
-                    unlink($oldImagePath);
-                }
-                $pathFile = uploadImage('Feature', $request->image);
-
-                $feature->where('id', $id)->update([
-                    'image' => $pathFile,
-                ]);
-            }
-            // تحديث السجل
-            $feature->update([
+            $contact->update([
                 'tittle_ar' => $request->tittle_ar,
                 'tittle_en' => $request->tittle_en,
                 'desc_ar' => $request->desc_ar,
                 'desc_en' => $request->desc_en,
+                'name_btn_ar'=>$request->name_btn_ar,
+                'name_btn_en'=>$request->name_btn_en,
+                'link_btn'=>$request->link_btn,
 
             ]);
 
@@ -121,19 +112,12 @@ class FeatureController extends Controller
     {
         try
         {
-            $feature= Features::find($id);
-            if (!$feature)
+            $contact= Contact_us::find($id);
+            if (!$contact)
             {
                 return $this->ReturnError(404,__('message.notFound'));
             }
-            if ($feature->image != null){
-                $image=Str::after($feature->image,'assets/');
-                $image=base_path('public/assets/'.$image);
-                unlink($image);
-                $feature->delete();
-            }
-            else
-                $feature->delete();
+            $contact->delete();
             return $this->ReturnSuccess(200,__('message.deleted'));
 
         }
@@ -142,7 +126,5 @@ class FeatureController extends Controller
             return $this->ReturnError($ex->getCode(),$ex->getCode());
         }
     }
-
-
 
 }

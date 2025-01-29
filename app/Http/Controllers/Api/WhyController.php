@@ -26,6 +26,18 @@ class WhyController extends Controller
         }
     }
 
+    public function showAll(){
+        try
+        {
+            $why=Why::latest()->paginate(pag);
+            return $this->ReturnData('why',$why,"");
+        }
+        catch (\Exception $ex)
+        {
+            return $this->ReturnError($ex->getCode(),$ex->getMessage());
+        }
+    }
+
     public function save(WhyRequest $request)
     {
         try

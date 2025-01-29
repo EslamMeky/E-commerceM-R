@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CachBackController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\ContactUsController;
 use App\Http\Controllers\Api\FeatureController;
 use App\Http\Controllers\Api\PaymobController;
 use App\Http\Controllers\Api\ProductController;
@@ -203,6 +204,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::post('save',[WhyController::class,'save']);
             Route::post('update/{id}',[WhyController::class,'update']);
             Route::get('/',[WhyController::class,'index']);
+            Route::get('/showAll',[WhyController::class,'showAll']);
             Route::get('delete/{id}',[WhyController::class,'delete']);
 
         });
@@ -214,7 +216,19 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::post('save',[FeatureController::class,'save']);
             Route::post('update/{id}',[FeatureController::class,'update']);
             Route::get('/',[FeatureController::class,'index']);
+            Route::get('/showAll',[FeatureController::class,'showAll']);
             Route::get('delete/{id}',[FeatureController::class,'delete']);
+
+        });
+
+
+        //////////////////  ContactUs //////////
+        Route::group(['prefix'=>'contactUs'],function (){
+            Route::post('save',[ContactUsController::class,'save']);
+            Route::post('update/{id}',[ContactUsController::class,'update']);
+            Route::get('/show',[ContactUsController::class,'show']);
+            Route::get('/showAll',[ContactUsController::class,'showAll']);
+            Route::get('delete/{id}',[ContactUsController::class,'delete']);
 
         });
 
