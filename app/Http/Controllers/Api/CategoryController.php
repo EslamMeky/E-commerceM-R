@@ -169,6 +169,26 @@ class CategoryController extends Controller
         }
     }
 
+    public function searchCategories(Request $request)
+    {
+        try {
+            $query = Category::query();
+
+            if ($request->has('name') && $request->name != '') {
+                $searchTerm = $request->name;
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('name_ar', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('name_en', 'like', '%' . $searchTerm . '%');
+                });
+            }
+
+            $categories = $query->get();
+
+            return $this->ReturnData('category',$categories,'');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(),$ex->getCode());
+        }
+    }
 
 
 }

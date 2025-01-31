@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminRequest;
 use App\Http\Traits\GeneralTrait;
 use App\Models\Admin;
+use App\Models\Orders;
+use App\Models\Products;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -206,4 +209,61 @@ class AdminController extends Controller
             return $this->ReturnError($ex->getCode(),$ex->getCode());
         }
     }
+
+    public function getDashboardStats()
+    {
+        try {
+            $totalUsers = User::count();
+            $totalProducts = Products::count();
+            $totalOrders = Orders::count();
+            $totalSales = Admin::where('type', 'sales')->count(); // لو عندك دور للبائعين
+
+            $data = [
+                'total_users' => $totalUsers,
+                'total_products' => $totalProducts,
+                'total_orders' => $totalOrders,
+                'total_sellers' => $totalSales,
+            ];
+
+            return $this->ReturnData('dashboard_stats', $data, 'Dashboard statistics retrieved successfully');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+
+    public function searchAdmins(Request $request)
+    {
+        try {
+            $query = Admin::query();
+
+            // البحث عن الاسم (name)
+            if ($request->has('name') && $request->name != '') {
+                $query->where('name', 'like', '%' . $request->name . '%');
+            }
+
+            // البحث عن البريد الإلكتروني (email)
+            if ($request->has('email') && $request->email != '') {
+                $query->where('email', 'like', '%' . $request->email . '%');
+            }
+
+            // البحث عن رقم الهاتف (phone)
+            if ($request->has('phone') && $request->phone != '') {
+                $query->where('phone', 'like', '%' . $request->phone . '%');
+            }
+
+            // البحث عن النوع (type)
+            if ($request->has('type') && $request->type != '') {
+                $query->where('type', 'like', '%' . $request->type . '%');
+            }
+
+            // إرجاع الإداريين الذين تطابقوا مع البحث
+            $admins = $query->get();
+
+           return $this->ReturnData('admin',$admins,'');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+
+
 }

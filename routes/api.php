@@ -11,10 +11,13 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactUsController;
 use App\Http\Controllers\Api\FeatureController;
+use App\Http\Controllers\Api\imagesbannerController;
+use App\Http\Controllers\Api\OverAllInfoController;
 use App\Http\Controllers\Api\PaymobController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewsController;
 use App\Http\Controllers\Api\ServicesLandController;
+use App\Http\Controllers\Api\socailmediaController;
 use App\Http\Controllers\Api\SubscribeController;
 use App\Http\Controllers\Api\WhyController;
 use Illuminate\Http\Request;
@@ -47,10 +50,12 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         Route::post('resent-otp', [AuthController::class, 'resentOtp']);
         Route::get('logout', [AuthController::class, 'logout']);
         Route::post('forget-password', [AuthController::class, 'forgetPassword']);
+        Route::post('changePassword', [AuthController::class, 'changePassword'])->middleware('auth:api');
         Route::post('reset-password', [AuthController::class, 'resetPassword']);
-        Route::get('singleUser/{user_id}', [AuthController::class, 'singleUser']);
+        Route::get('singleUser', [AuthController::class, 'singleUser'])->middleware('auth:api');
         Route::get('showAll', [AuthController::class, 'showAll']);
         Route::post('updateProfile', [AuthController::class, 'updateProfile'])->middleware('auth:api');
+        Route::get('searchUsers', [AuthController::class, 'searchUsers']);
 
     });
 
@@ -67,6 +72,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::get('showAll',[CategoryController::class,'showAll']);
             Route::post('update/{category_id}',[CategoryController::class,'update']);
             Route::get('delete/{category_id}',[CategoryController::class,'delete']);
+            Route::get('searchCategories',[CategoryController::class,'searchCategories']);
         });
 
 
@@ -81,7 +87,8 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::get('delete/{product_id}',[ProductController::class,'delete']);
             Route::get('deleteAll',[ProductController::class,'deleteAll']);
             Route::get('relatedProducts/{product_id}',[ProductController::class,'relatedProducts']);
-            Route::get('searchProduct',[ProductController::class,'searchProduct']);
+            Route::get('searchProducts',[ProductController::class,'searchProducts']);
+            Route::get('getAllColors',[ProductController::class,'getAllColors']);
         });
 
         ///////////////////   Services  //////////////
@@ -141,6 +148,8 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         Route::get('showAll',[AdminController::class,'showAll']);
         Route::get('showByType/{type}',[AdminController::class,'showByType']);
         Route::get('delete/{id}',[AdminController::class,'delete']);
+        Route::get('getDashboardStats',[AdminController::class,'getDashboardStats']);
+        Route::get('searchAdmins',[AdminController::class,'searchAdmins']);
 
         //////////////////////   reviews /////
         Route::group(['prefix'=>'review'],function (){
@@ -171,6 +180,8 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::get('/showAll', [PaymobController::class, 'showAll']);
             Route::get('/showByCode/{code}', [PaymobController::class, 'showByCode']);
             Route::post('/cashOnDelivery', [PaymobController::class, 'cashOnDelivery']);
+            Route::get('/searchOrders', [PaymobController::class, 'searchOrders']);
+
 
         });
 
@@ -189,6 +200,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         Route::group(['prefix'=>'contact'],function (){
             Route::get('/', [ContactController::class, 'index']); // عرض جميع السجلات
             Route::post('/save', [ContactController::class, 'save']); // إنشاء سجل جديد
+            Route::get('/searchContacts', [ContactController::class, 'searchContacts']);
 
         });
         ///////////////////////// subscribe //////////
@@ -229,6 +241,33 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::get('/show',[ContactUsController::class,'show']);
             Route::get('/showAll',[ContactUsController::class,'showAll']);
             Route::get('delete/{id}',[ContactUsController::class,'delete']);
+
+        });
+
+
+        ///////////////   over all info  ////////
+        Route::group(['prefix'=>'info'],function (){
+            Route::post('save',[OverAllInfoController::class,'save']);
+            Route::post('update/{id}',[OverAllInfoController::class,'update']);
+            Route::get('/show',[OverAllInfoController::class,'show']);
+
+        });
+
+        ////////////////  Images Banner  ///
+
+        Route::group(['prefix'=>'banner'],function (){
+            Route::post('save',[imagesbannerController::class,'save']);
+            Route::post('update/{id}',[imagesbannerController::class,'update']);
+            Route::get('/show',[imagesbannerController::class,'show']);
+
+        });
+
+        ////////////////  Social medial  ///
+
+        Route::group(['prefix'=>'social'],function (){
+            Route::post('save',[socailmediaController::class,'save']);
+            Route::post('update/{id}',[socailmediaController::class,'update']);
+            Route::get('/show',[socailmediaController::class,'show']);
 
         });
 

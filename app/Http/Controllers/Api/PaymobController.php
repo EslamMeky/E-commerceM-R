@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\GeneralTrait;
+use App\Models\Cart;
 use App\Models\Orders;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -198,6 +199,10 @@ class PaymobController extends Controller
                 ]);
             }
 
+            if (!empty($order->user_id)) {
+                Cart::where('user_id', $order->user_id)->delete();
+            }
+
             return redirect()->route('payment.success');
         }
 
@@ -236,8 +241,8 @@ class PaymobController extends Controller
             $order = Orders::create([
                 'transaction_id' => null, // لا يوجد Transaction ID للدفع عند الاستلام
                 'order_id' => uniqid(), // يمكنك استخدام معرف فريد للطلب
-                'user_id' => $data['user_id'],
-                'code_user' => $data['code_user'] ?? null,
+                'user_id' => $data['userId'],
+                'code_user' => $data['codeUser'] ?? null,
                 'type_user' => $data['type_user'] ?? 'guest',
                 'amount_cents' => $data['amount_cents'],
                 'currency' => $data['currency'],
@@ -250,8 +255,48 @@ class PaymobController extends Controller
             ]);
 
             // إذا أردت إرسال إشعار أو بريد إلكتروني، يمكنك إضافته هنا
+            if (!empty($data['userId'])) {
+            Cart::where('user_id', $data['userId'])->delete();
+            }
 
-            return $this->ReturnSuccess(200,'saved Successfully cash on delivery');
+            return $this->ReturnSuccess(200,__('message.saved'));
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+
+    public function searchOrders(Request $request)
+    {
+        try {
+            $query = Orders::query();
+
+            // البحث عن الـ order_id
+            if ($request->has('order_id') && $request->order_id != '') {
+                $query->where('order_id', 'like', '%' . $request->order_id . '%');
+            }
+
+            // البحث عن الكود الخاص بالمستخدم (code_user)
+            if ($request->has('code_user') && $request->code_user != '') {
+                $query->where('code_user', 'like', '%' . $request->code_user . '%');
+            }
+
+            if ($request->has('status') && $request->status != '') {
+                $query->where('status', 'like', '%' . $request->status . '%');
+            }
+
+            if ($request->has('customer_name') && $request->customer_name != '') {
+                $query->where('shipping_data', 'like', '%"first_name":"' . $request->customer_name . '%')
+                    ->orWhere('shipping_data', 'like', '%"last_name":"' . $request->customer_name . '%');
+            }
+            // البحث بالفترة الزمنية (start_date, end_date)
+            if ($request->has('start_date') && $request->has('end_date')) {
+                $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+            }
+
+            // إرجاع الطلبات التي تطابق البحث
+            $orders = $query->latest()->get();
+
+           return $this->ReturnData('orders',$orders,'');
         } catch (\Exception $ex) {
             return $this->ReturnError($ex->getCode(), $ex->getMessage());
         }

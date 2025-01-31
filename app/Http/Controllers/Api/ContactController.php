@@ -55,4 +55,23 @@ class ContactController extends Controller
 
         }
     }
+
+    public function searchContacts(Request $request)
+    {
+        try {
+            $query = Contact::query();
+
+            // البحث عن الاسم
+            if ($request->has('name') && $request->name != '') {
+                $query->where('name', 'like', '%' . $request->name . '%');
+            }
+
+            $contacts = $query->get();
+
+            return $this->ReturnData('contacts', $contacts, 'Results found');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+
 }

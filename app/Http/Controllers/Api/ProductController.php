@@ -533,69 +533,33 @@ class ProductController extends Controller
     }
 
 
-    public function searchProduct(Request $request)
+    public function searchProducts(Request $request)
     {
         try {
-            $searchTerm = $request->input('search'); // القيمة المدخلة من المستخدم
-
-            // بناء الاستعلام
             $query = Products::query();
 
-            // البحث في اسم المنتج
-            $query->where(function ($query) use ($searchTerm) {
-                $locale = app()->getLocale();
-                $query->where('name_' . $locale, 'like', '%' . $searchTerm . '%');
-            });
-
-            // البحث في الفئة (category)
-            $query->orWhere(function ($query) use ($searchTerm) {
-                $locale = app()->getLocale();
-                $query->whereHas('category', function ($query) use ($searchTerm, $locale) {
-                    $query->where('name_' . $locale, 'like', '%' . $searchTerm . '%');
+            // البحث عن الاسم بالعربية (name_ar)
+            if ($request->has('name') && $request->name != '') {
+                $searchTerm = $request->name;
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('name_ar', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('name_en', 'like', '%' . $searchTerm . '%');
                 });
-            });
-
-            // البحث في اللون (colors)
-            $query->orWhere('colors', 'like', '%' . $searchTerm . '%');
-
-            // البحث في المقاس (sizes)
-            $query->orWhere('sizes', 'like', '%' . $searchTerm . '%');
-
-            // جلب المنتجات بناءً على البحث
-            $products = $query->select([
-                'id',
-                'category_id',
-                'name_' . app()->getLocale() . ' as name',
-                'image',
-                'OtherImage',
-                'desc_' . app()->getLocale() . ' as desc',
-                'main_price',
-                'price_discount',
-                'colors',
-                'sizes',
-                'stock',
-                'created_at',
-                'updated_at'
-            ])->get();
-
-            if ($products->isEmpty()) {
-                // إذا لم يتم العثور على منتجات، إرجاع استجابة فارغة
-                return $this->ReturnData('products', [], 'No products found');
             }
-            // تحويل الصور الإضافية والألوان والمقاسات إلى Arrays
-            foreach ($products as $product) {
-                if ($product->OtherImage) {
-                    $product->OtherImage = $product->OtherImage; // إذا كانت مخزنة كـ Array
-                }
 
-                // إرجاع المنتج مع الألوان والمقاسات كـ Arrays
-                $product->colors = $product->colors; // الألوان كـ Array
-                $product->sizes = $product->sizes; // المقاسات كـ Array
+            // البحث عن اسم الفئة في جدول categories (name_ar أو name_en)
+            if ($request->has('category_name') && $request->category_name != '') {
+                $query->join('categories', 'products.category_id', '=', 'categories.id')
+                    ->where(function ($q) use ($request) {
+                        $q->where('categories.name_ar', 'like', '%' . $request->category_name . '%')
+                            ->orWhere('categories.name_en', 'like', '%' . $request->category_name . '%');
+                    });
             }
 
 
-            return $this->ReturnData('products', $products, '');
+            $products = $query->select('products.*')->get();
 
+            return $this->ReturnData('product',$products,'');
         } catch (\Exception $ex) {
             return $this->ReturnError($ex->getCode(), $ex->getMessage());
         }
@@ -624,6 +588,35 @@ class ProductController extends Controller
             }
 
             return $this->ReturnData('products', $products, '');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+
+    public function getAllColors()
+    {
+        try {
+            // جلب كل القيم من عمود الألوان
+            $products = Products::pluck('colors');
+
+            $colorCounts = [];
+
+            foreach ($products as $productColors) {
+                if ($productColors) {
+                    $colorsArray = json_decode($productColors, true); // تحويل JSON إلى مصفوفة
+                    if (is_array($colorsArray)) {
+                        foreach ($colorsArray as $color) {
+                            if (!isset($colorCounts[$color])) {
+                                $colorCounts[$color] = 1;
+                            } else {
+                                $colorCounts[$color]++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return $this->ReturnData('colors', $colorCounts, 'Colors retrieved successfully');
         } catch (\Exception $ex) {
             return $this->ReturnError($ex->getCode(), $ex->getMessage());
         }

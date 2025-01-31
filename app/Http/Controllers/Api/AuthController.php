@@ -22,7 +22,7 @@ class AuthController extends Controller
         try
         {
             $otp = rand(100000, 999999);
-            $otpExpiry = now()->addMinutes(3);
+            $otpExpiry = now()->addMinutes(5);
 
             $user = User::create([
                 'name' => $request->name,
@@ -195,6 +195,31 @@ class AuthController extends Controller
     }
 
 
+    public function changePassword(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|string|min:8|confirmed',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            // جلب المستخدم المصادق عليه
+            $user = auth()->user();
+
+            // تحديث كلمة المرور مع التشفير
+            $user->update([
+                'password' => bcrypt($request->password),
+            ]);
+
+            return $this->ReturnSuccess(200, __('message.updated'));
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+
     public function resetPassword(Request $request)
     {
         try {
@@ -232,22 +257,23 @@ class AuthController extends Controller
         }
     }
 
-    public function singleUser($user_id)
+    public function singleUser()
     {
-        try
-        {
-         $user=User::where('id',$user_id)->first();
-            if (!$user)
-            {
-                return $this->ReturnError(404,__('message.notFound'));
-            }
-            return $this->ReturnData('user',$user,'');
-        }
-        catch (\Exception $ex){
-            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        try {
+            // جلب المستخدم المصادق عليه
+            $user = auth()->user();
 
+            // التحقق من وجود المستخدم
+            if (!$user) {
+                return $this->ReturnError(404, __('message.notFound'));
+            }
+
+            return $this->ReturnData('user', $user, '');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
         }
     }
+
 
     public function showAll()
     {
@@ -314,6 +340,53 @@ class AuthController extends Controller
 
         }
     }
+
+    public function searchUsers(Request $request)
+    {
+        try {
+            $query = User::query();
+
+            // البحث عن الاسم (name)
+            if ($request->has('name') && $request->name != '') {
+                $query->where('name', 'like', '%' . $request->name . '%');
+            }
+
+            // البحث عن البريد الإلكتروني (email)
+            if ($request->has('email') && $request->email != '') {
+                $query->where('email', 'like', '%' . $request->email . '%');
+            }
+
+            // البحث عن رقم الهاتف (phone)
+            if ($request->has('phone') && $request->phone != '') {
+                $query->where('phone', 'like', '%' . $request->phone . '%');
+            }
+
+            // البحث عن الجنس (gender)
+            if ($request->has('gender') && $request->gender != '') {
+                $query->where('gender', 'like', '%' . $request->gender . '%');
+            }
+
+            // البحث عن البلد (country)
+            if ($request->has('country') && $request->country != '') {
+                $query->where('country', 'like', '%' . $request->country . '%');
+            }
+
+            // البحث عن المدينة (city)
+            if ($request->has('city') && $request->city != '') {
+                $query->where('city', 'like', '%' . $request->city . '%');
+            }
+
+            // تطبيق الفلاتر، البحث حسب الشروط المذكورة
+            $users = $query->get();
+
+
+
+            return $this->ReturnData('users', $users, 'Results found');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+
 
 
 }
