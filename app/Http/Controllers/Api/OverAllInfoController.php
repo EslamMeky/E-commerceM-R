@@ -21,7 +21,8 @@ class OverAllInfoController extends Controller
                 'phone'=>$request->phone,
                 'whatsUp'=>$request->whatsUp,
                 'address'=>$request->address,
-                'desc'=>$request->desc,
+                'desc_ar'=>$request->desc_ar,
+                'desc_en'=>$request->desc_en,
                 'linkMap'=>$request->linkMap,
             ]);
 
@@ -45,7 +46,8 @@ class OverAllInfoController extends Controller
                 'phone'=>$request->phone,
                 'whatsUp'=>$request->whatsUp,
                 'address'=>$request->address,
-                'desc'=>$request->desc,
+                'desc_ar'=>$request->desc_ar,
+                'desc_en'=>$request->desc_en,
                 'linkMap'=>$request->linkMap,
             ]);
 
@@ -67,4 +69,15 @@ class OverAllInfoController extends Controller
         }
     }
 
+    public function showAll()
+    {
+        try {
+            $info = OverAllInfo::latest()->get();
+
+
+            return $this->ReturnData('info', $info, '');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
 }

@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('phone');
             $table->string('whatsUp');
             $table->string('address');
-            $table->text('desc');
+            $table->text('desc_ar');
+            $table->text('desc_en');
             $table->string('linkMap');
             $table->timestamps();
         });

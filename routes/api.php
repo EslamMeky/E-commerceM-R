@@ -250,6 +250,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::post('save',[OverAllInfoController::class,'save']);
             Route::post('update/{id}',[OverAllInfoController::class,'update']);
             Route::get('/show',[OverAllInfoController::class,'show']);
+            Route::get('/showAll',[OverAllInfoController::class,'showAll']);
 
         });
 

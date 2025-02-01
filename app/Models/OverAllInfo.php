@@ -15,20 +15,23 @@ class OverAllInfo extends Model
         'phone',
         'whatsUp',
         'address',
-        'desc',
+        'desc_ar',
+        'desc_en',
         'linkMap',
         'created_at',
         'updated_at',
     ];
     public $timestamps=true;
-    public function scopeSelection($q){
+    public function scopeSelection($q)
+    {
+        $local = app()->getLocale();
         return $q->select([
             'id',
             'email',
             'phone',
             'whatsUp',
             'address',
-            'desc',
+            'desc_'.$local.' as desc',
             'linkMap',
             'created_at',
             'updated_at',

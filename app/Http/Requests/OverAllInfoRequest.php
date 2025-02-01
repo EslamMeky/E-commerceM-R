@@ -30,7 +30,8 @@ class OverAllInfoRequest extends FormRequest
             'phone' => 'required|string',
             'whatsUp' => 'required|string',
             'address' => 'required|string',
-            'desc' => 'required|string',
+            'desc_ar' => 'required|string',
+            'desc_en' => 'required|string',
             'linkMap' => 'required|string',
 
         ];
