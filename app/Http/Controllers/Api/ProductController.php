@@ -547,6 +547,9 @@ class ProductController extends Controller
                 });
             }
 
+            if ($request->has('barcode') && $request->barcode != '') {
+                $query->where('barcode', 'like', '%' . $request->barcode . '%');
+            }
             // البحث عن اسم الفئة في جدول categories (name_ar أو name_en)
             if ($request->has('category_name') && $request->category_name != '') {
                 $query->join('categories', 'products.category_id', '=', 'categories.id')
