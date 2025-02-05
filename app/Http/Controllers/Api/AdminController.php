@@ -82,8 +82,8 @@ class AdminController extends Controller
         {
             $validator = Validator::make($request->all(), [
                 'name' => 'required',
-                'phone' => 'required',
-                'email' => 'required',
+                'phone' => 'required|unique:admins,phone,' . auth('admin')->id(),
+                'email' => 'required|email|unique:admins,email,' . auth('admin')->id(),
                 'gender' => 'required',
                 'type' => 'required',
                 'role' => 'required',
@@ -178,17 +178,25 @@ class AdminController extends Controller
 
     public function showByType($type)
     {
-        try
-        {
-            $users = Admin::where('type',$type)
-            ->paginate(pag);
-            return $this->ReturnData('admin', $users, '');
-        }
-        catch (\Exception $ex){
-            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        try {
+            $query = Admin::query();
 
+            // لو النوع هو 'admin'، جيب الـ admin و moderator
+            if ($type === 'Admin') {
+                $query->whereIn('type', ['Admin', 'Moderator']);
+            } else {
+                // غير ذلك، جيب النوع المطلوب فقط
+                $query->where('type', $type);
+            }
+
+            $admins = $query->paginate(pag);
+
+            return $this->ReturnData('admin', $admins, '');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
         }
     }
+
 
     public function delete($id)
     {

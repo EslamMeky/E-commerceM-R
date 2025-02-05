@@ -533,24 +533,61 @@ class ProductController extends Controller
     }
 
 
+//    public function searchProducts(Request $request)
+//    {
+//        try {
+//            $query = Products::query();
+//
+//            // البحث عن الاسم بالعربية (name_ar)
+//            if ($request->has('name') && $request->name != '') {
+//                $searchTerm = $request->name;
+//                $query->where(function($q) use ($searchTerm) {
+//                    $q->where('name_ar', 'like', '%' . $searchTerm . '%')
+//                        ->orWhere('name_en', 'like', '%' . $searchTerm . '%');
+//                });
+//            }
+//
+//            if ($request->has('barcode') && $request->barcode != '') {
+//                $query->where('barcode', 'like', '%' . $request->barcode . '%');
+//            }
+//            // البحث عن اسم الفئة في جدول categories (name_ar أو name_en)
+//            if ($request->has('category_name') && $request->category_name != '') {
+//                $query->join('categories', 'products.category_id', '=', 'categories.id')
+//                    ->where(function ($q) use ($request) {
+//                        $q->where('categories.name_ar', 'like', '%' . $request->category_name . '%')
+//                            ->orWhere('categories.name_en', 'like', '%' . $request->category_name . '%');
+//                    });
+//            }
+//
+//
+//            $products = $query->select('products.*')->get();
+//
+//            return $this->ReturnData('product',$products,'');
+//        } catch (\Exception $ex) {
+//            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+//        }
+//    }
+
     public function searchProducts(Request $request)
     {
         try {
             $query = Products::query();
 
-            // البحث عن الاسم بالعربية (name_ar)
+            // البحث عن الاسم بالعربية (name_ar) داخل جدول المنتجات
             if ($request->has('name') && $request->name != '') {
                 $searchTerm = $request->name;
                 $query->where(function($q) use ($searchTerm) {
-                    $q->where('name_ar', 'like', '%' . $searchTerm . '%')
-                        ->orWhere('name_en', 'like', '%' . $searchTerm . '%');
+                    $q->where('products.name_ar', 'like', '%' . $searchTerm . '%')
+                        ->orWhere('products.name_en', 'like', '%' . $searchTerm . '%');
                 });
             }
 
+            // البحث عن الباركود
             if ($request->has('barcode') && $request->barcode != '') {
-                $query->where('barcode', 'like', '%' . $request->barcode . '%');
+                $query->where('products.barcode', 'like', '%' . $request->barcode . '%');
             }
-            // البحث عن اسم الفئة في جدول categories (name_ar أو name_en)
+
+            // البحث عن اسم الفئة في جدول categories
             if ($request->has('category_name') && $request->category_name != '') {
                 $query->join('categories', 'products.category_id', '=', 'categories.id')
                     ->where(function ($q) use ($request) {
@@ -559,15 +596,28 @@ class ProductController extends Controller
                     });
             }
 
-
+            // تحديد الأعمدة بوضوح
             $products = $query->select('products.*')->get();
+            foreach ($products as $product) {
+                // إذا كانت الصور الإضافية موجودة، تحويلها من JSON إلى Array
+                if ($product->OtherImage) {
+                    $product->OtherImage = $product->OtherImage; // إذا كانت مخزنة كـ Array
+                }
 
-            return $this->ReturnData('product',$products,'');
+                if ($product->colors) {
+                    $product->colors = json_decode($product->colors, true);
+                }
+                if ($product->sizes) {
+                    $product->sizes = json_decode($product->sizes, true);
+                }
+            }
+
+
+            return $this->ReturnData('product', $products, '');
         } catch (\Exception $ex) {
             return $this->ReturnError($ex->getCode(), $ex->getMessage());
         }
     }
-
 
     public function showOutOfStock()
     {
