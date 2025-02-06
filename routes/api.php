@@ -256,7 +256,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
 
         ////////////////  Images Banner  ///
 
-        Route::group(['prefix'=>'banner'],function (){
+        Route::group(['prefix'=>'ImagesBanner'],function (){
             Route::post('save',[imagesbannerController::class,'save']);
             Route::post('update/{id}',[imagesbannerController::class,'update']);
             Route::get('/show',[imagesbannerController::class,'show']);
