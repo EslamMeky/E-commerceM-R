@@ -75,4 +75,8 @@ class User extends Authenticatable implements JWTSubject
     {
         return ($val!=null)? asset('assets/'.$val):"";
     }
+
+    public function orders(){
+        return $this->hasMany(Orders::class,'user_id');
+    }
 }

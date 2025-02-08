@@ -221,7 +221,7 @@ class PaymobController extends Controller
     public function showAll(){
         try
         {
-         $orders= Orders::paginate(pag);
+         $orders= Orders::latest()->paginate(pag);
           return $this->ReturnData('orders',$orders,"");
         }catch (\Exception $ex){
             return $this->ReturnError($ex->getCode(), $ex->getMessage());
@@ -230,8 +230,7 @@ class PaymobController extends Controller
     public function showByCode($code){
         try
         {
-            $orders= Orders::
-            where('code_user',$code)->paginate(pag);
+            $orders= Orders::where('code_user',$code)->paginate(pag);
             return $this->ReturnData('orders',$orders,"");
         }catch (\Exception $ex){
             return $this->ReturnError($ex->getCode(), $ex->getMessage());
@@ -253,10 +252,10 @@ class PaymobController extends Controller
                 'user_id' => $data['userId'],
                 'code_user' => $data['codeUser'] ?? null,
                 'type_user' => $data['type_user'] ?? 'guest',
-                'amount_cents' => $data['amount_cents'],
+                'amount_cents' => $data['amount_cents'] / 100,
                 'currency' => $data['currency'],
-                'discount' => $data['discount'] ?? 0,
-                'before_discount' => $data['before_discount'] ?? 0,
+                'discount' => $data['discount'] ?? 0 / 100,
+                'before_discount' => $data['before_discount'] ?? 0 / 100,
                 'shipping_data' => json_encode($data['shipping_data']),
                 'items' => json_encode($data['items']),
                 'payment_method' => $data['payment_method'],
@@ -267,7 +266,13 @@ class PaymobController extends Controller
             if (!empty($data['userId'])) {
             Cart::where('user_id', $data['userId'])->delete();
             }
+            $shippingData = is_string($order->shipping_data)
+                ? json_decode($order->shipping_data, true)
+                : $order->shipping_data; // إذا كانت مصفوفة، استخدمها مباشرة
 
+            if (is_array($shippingData) && !empty($shippingData['email'])) {
+                Mail::to($shippingData['email'])->send(new OrderPaidMail($order));
+            }
             return $this->ReturnSuccess(200,__('message.saved'));
         } catch (\Exception $ex) {
             return $this->ReturnError($ex->getCode(), $ex->getMessage());

@@ -261,7 +261,7 @@ class AuthController extends Controller
     {
         try {
             // جلب المستخدم المصادق عليه
-            $user = auth()->user();
+            $user = User::with('orders')->find(auth()->id());
 
             // التحقق من وجود المستخدم
             if (!$user) {
