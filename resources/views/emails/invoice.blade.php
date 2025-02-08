@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { font-family: "Tahoma", "Arial", "Cairo", sans-serif; direction: rtl; text-align: right; }
+        body { font-family: "Tahoma", "Arial", "Cairo", sans-serif; direction: ltr; text-align: right; }
         .invoice-container { padding: 20px; max-width: 800px; margin: auto; border: 1px solid #ccc; border-radius: 10px; }
         h1 { text-align: center; color: #4CAF50; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
