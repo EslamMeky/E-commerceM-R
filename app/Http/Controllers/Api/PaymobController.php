@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\GeneralTrait;
+use App\Mail\OrderPaidMail;
 use App\Models\Cart;
 use App\Models\Orders;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 class PaymobController extends Controller
@@ -151,10 +153,10 @@ class PaymobController extends Controller
                 'type_user' => $data['type_user'] ?? 'guest',
                 'user_id' => $userId ,
                 'code_user'=>$codeUser,
-                'amount_cents' => $data['amount_cents'],
+                'amount_cents' => $data['amount_cents'] / 100,
                 'currency' => $data['currency'],
-                'discount' => $data['discount'] ?? 0,
-                'before_discount' => $data['before_discount'] ?? 0,
+                'discount' => ($data['discount'] ?? 0) / 100, // قسمة الخصم على 100
+                'before_discount' => ($data['before_discount'] ?? 0) / 100,
                 'shipping_data' => json_encode($data['shipping_data']) ,
                 'items' => json_encode($data['items']) ,
                 'status' => 'pending',  // تعيين الحالة الافتراضية
@@ -183,7 +185,8 @@ class PaymobController extends Controller
         // فحص إذا كانت العملية ناجحة
         $response = $request->all();
 
-        if (isset($response['success']) && $response['success'] === 'true') {
+        if (isset($response['success']) && $response['success'] === 'true')
+        {
             // الحصول على بيانات الطلب وحالة الدفع
             $transactionId = $response['id']; // تم تعديلها هنا
             $orderId = $response['order']; // تم تعديلها هنا
@@ -193,14 +196,20 @@ class PaymobController extends Controller
             if ($order) {
                 // تحديث بيانات الطلب في قاعدة البيانات بعد الدفع
                 $order->update([
-                    'transaction_id'=>$transactionId,
-                    'payment_method'=>$response['source_data_type'],
-                    'status' => "paid" ,
+                    'transaction_id' => $transactionId,
+                    'payment_method' => $response['source_data_type'],
+                    'status' => "paid",
                 ]);
-            }
 
-            if (!empty($order->user_id)) {
-                Cart::where('user_id', $order->user_id)->delete();
+
+                if (!empty($order->user_id)) {
+                    Cart::where('user_id', $order->user_id)->delete();
+                }
+                $shippingData = $order->shipping_data; // لا تحتاج إلى json_decode
+
+                if (is_array($shippingData) && !empty($shippingData['email'])) {
+                    Mail::to($shippingData['email'])->send(new OrderPaidMail($order));
+                }
             }
 
             return redirect()->route('payment.success');

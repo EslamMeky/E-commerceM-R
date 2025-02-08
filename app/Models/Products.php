@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Mail\NewProductMail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Mail;
 
 class Products extends Model
 {
@@ -101,4 +103,18 @@ class Products extends Model
         return $this->hasMany(Review::class,'product_id');
     }
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($product) {
+            // جلب جميع المشتركين
+            $subscribers = Subscribe::pluck('email');
+
+            // إرسال البريد لكل مشترك
+            foreach ($subscribers as $email) {
+                Mail::to($email)->send(new NewProductMail($product));
+            }
+        });
+    }
 }
