@@ -277,6 +277,15 @@ class PaymobController extends Controller
                 'payment_method' => $data['payment_method'],
                 'status' => $data['status'],
             ]);
+            $user= User::where('id',$data['userId'])
+                ->where('code',null)->first();
+            if ($user)
+            {
+                $uniqueCode = generateUniqueRandomCode('users', 'code', 12);
+                $user->update([
+                    'code'=>$uniqueCode,
+                ]);
+            }
             foreach ($data['items'] as $item) {
                 $product = Products::where('name_ar', $item['name'])
                     ->orWhere('name_en', $item['name'])
