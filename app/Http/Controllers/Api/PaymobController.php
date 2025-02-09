@@ -7,6 +7,7 @@ use App\Http\Traits\GeneralTrait;
 use App\Mail\OrderPaidMail;
 use App\Models\Cart;
 use App\Models\Orders;
+use App\Models\Products;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -201,6 +202,21 @@ class PaymobController extends Controller
                     'status' => "paid",
                 ]);
 
+                $items = is_string($order->items) ? json_decode($order->items, true) : $order->items;
+
+                foreach ($items as $item) {
+                    $product = Products::where('name_ar', $item['name'])
+                        ->orWhere('name_en', $item['name'])
+                        ->first();
+                    if ($product) {
+                        // التأكد أن المخزون لا يصبح سالبًا
+                        if ($product->stock >= $item['quantity']) {
+                            $product->decrement('stock', $item['quantity']);
+                        } else {
+                            return redirect()->route('payment.failed')->with('error', "الكمية المطلوبة غير متاحة في المخزون للمنتج: {$product->name}");
+                        }
+                    }
+                }
 
                 if (!empty($order->user_id)) {
                     Cart::where('user_id', $order->user_id)->delete();
@@ -261,6 +277,15 @@ class PaymobController extends Controller
                 'payment_method' => $data['payment_method'],
                 'status' => $data['status'],
             ]);
+            foreach ($data['items'] as $item) {
+                $product = Products::where('name_ar', $item['name'])
+                    ->orWhere('name_en', $item['name'])
+                    ->first();
+
+                if ($product) {
+                    $product->decrement('stock', $item['quantity']);
+                }
+            }
 
             // إذا أردت إرسال إشعار أو بريد إلكتروني، يمكنك إضافته هنا
             if (!empty($data['userId'])) {
