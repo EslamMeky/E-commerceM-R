@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('address');
             $table->text('desc_ar');
             $table->text('desc_en');
-            $table->string('linkMap');
+            $table->text('linkMap');
             $table->timestamps();
         });
     }

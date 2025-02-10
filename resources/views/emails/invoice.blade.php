@@ -238,7 +238,8 @@
 
 <div class="invoice-container">
     <div class="header">
-{{--        <img src="{{ asset('logo.jpg') }}" alt="Company Logo">--}}
+        {{--        <img src="http://127.0.0.1:8000/logo.jpg" alt="Company Logo">--}}
+        <img src="{{ $message->embed($logoPath) }}" alt="Company Logo">
         <h1 class="invoice-title">
             @if($isArabic) فاتورة @else Invoice @endif
         </h1>

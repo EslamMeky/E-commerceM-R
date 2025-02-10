@@ -46,7 +46,10 @@ class OrderPaidMail extends Mailable
     {
         return new Content(
             view: 'emails.invoice',
-            with: ['order' => $this->order],
+            with: [
+                'order' => $this->order,
+                'logoPath' => public_path('logo.jpg'), // مسار الصورة
+            ],
         );
     }
 
