@@ -11,4 +11,6 @@ return [
     'saved'=>'Saved Successfully',
     'deleted'=>'deleted Successfully',
     'out_of_stock'=>'Out Of Stock',
+    'noCommission'=>'No commission available',
+    'withdrawalAlreadyDone'=>'withdrawal Already Done',
 ];

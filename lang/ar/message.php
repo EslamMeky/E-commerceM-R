@@ -11,4 +11,8 @@ return [
     'saved'=>'تم الاضافه بنجاح',
     'deleted'=>'تم الحذف بنجاح',
     'out_of_stock'=>'إنتهى من المخزن',
+    'noCommission'=>'لا توجد عمولة متاحة',
+    'withdrawalAlreadyDone'=>'تم السحب بالفعل',
+
+
 ];

@@ -25,6 +25,7 @@ class Orders extends Model
         'before_discount',
         'shipping_data',
         'items',
+        'commission_paid',
         'created_at',
         'updated_at',
     ];
@@ -45,6 +46,7 @@ class Orders extends Model
             'before_discount',
             'shipping_data',
             'items',
+            'commission_paid',
             'created_at',
             'updated_at',
         ]);

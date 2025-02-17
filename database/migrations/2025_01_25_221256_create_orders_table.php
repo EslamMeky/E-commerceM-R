@@ -28,6 +28,7 @@ return new class extends Migration
             $table->decimal('before_discount', 10, 2)->nullable(); // المبلغ قبل الخصم
             $table->json('shipping_data'); // بيانات الشحن
             $table->json('items'); // بيانات المنتجات
+            $table->string('commission_paid')->default('false');
             $table->timestamps();
         });
     }

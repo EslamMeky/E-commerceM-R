@@ -167,7 +167,7 @@ class AdminController extends Controller
     {
         try
         {
-                $users = Admin::paginate(pag);
+                $users = Admin::latest()->paginate(pag);
             return $this->ReturnData('admin', $users, '');
         }
         catch (\Exception $ex){

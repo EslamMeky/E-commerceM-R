@@ -34,6 +34,12 @@
             font-size: 1.2em;
         }
     </style>
+    <script>
+        setTimeout(function() {
+            window.location.href = "http://localhost:5173/";
+        }, 1000);
+    </script>
+
 </head>
 <body>
 <div class="container">

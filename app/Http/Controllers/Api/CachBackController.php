@@ -90,18 +90,45 @@ class CachBackController extends Controller
         }
     }
 
+//    public function showCashbackToUser($code ,$user_id)
+//    {
+//        try
+//        {
+//          $orders= Orders::where('code_user',$code)->where('user_id','!=', $user_id)->paginate(pag);
+//            return $this->ReturnData('orders',$orders,'');
+//        }
+//        catch (\Exception $ex)
+//        {
+//            return $this->ReturnError($ex->getCode(),$ex->getMessage());
+//
+//        }
+//    }
+
     public function showCashbackToUser($code ,$user_id)
     {
         try
         {
-          $orders= Orders::where('code_user',$code)->where('user_id','!=', $user_id)->paginate(pag);
-            return $this->ReturnData('orders',$orders,'');
+            $orders = Orders::where('code_user', $code)
+                ->where(function ($query) use ($user_id) {
+                    $query->where('user_id', '!=', $user_id)
+                        ->orWhereNull('user_id'); // السماح بأن يكون user_id = NULL
+                })
+                ->get();
+
+            if ($orders->isNotEmpty()) {
+                $cashback = Cashback::get();
+
+                return $this->ReturnData('cashback', $cashback, '');
+            }
+
+            return $this->ReturnData('cashback', [], '');
+
+
         }
         catch (\Exception $ex)
         {
             return $this->ReturnError($ex->getCode(),$ex->getMessage());
 
-        }
-    }
-
+           }
+       }
 }

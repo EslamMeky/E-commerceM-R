@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\BannerLandController;
 use App\Http\Controllers\Api\CachBackController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CommissionController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactUsController;
 use App\Http\Controllers\Api\FeatureController;
@@ -271,6 +272,28 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::get('/show',[socailmediaController::class,'show']);
 
         });
+
+        ////////////////// commission  ////////////
+        Route::prefix('commissions')->group(function() {
+            // حساب العمولة
+            Route::get('/calculate/{adminId}', [CommissionController::class, 'calculateCommission']);
+            // طلب سحب العمولة
+            Route::post('/withdraw/{adminId}', [CommissionController::class, 'requestWithdrawal']);
+            // تحديث حالة العمولة
+            Route::post('/update/{commissionId}', [CommissionController::class, 'updateCommissionStatus']);
+            // جلب العمولات الخاصة بالبائع
+            Route::get('/sales/{adminId}', [CommissionController::class, 'getCommissionsByAdmin']);
+            // حساب العمولة الشهرية
+            Route::get('/monthly/{adminId}/{month}/{year}', [CommissionController::class, 'calculateMonthlyCommission']);
+            // التحقق من العمولات المعلقة في فترة زمنية
+            Route::get('/pending/{adminId}/{fromDate}/{toDate}', [CommissionController::class, 'checkPendingCommissions']);
+            // البحث في العمولات
+            Route::post('/search', [CommissionController::class, 'searchCommissions']);
+            // عرض العمولات
+            Route::get('/show', [CommissionController::class, 'show']);
+        });
+
+
 
     });
 

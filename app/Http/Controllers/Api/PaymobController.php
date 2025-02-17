@@ -161,6 +161,7 @@ class PaymobController extends Controller
                 'shipping_data' => json_encode($data['shipping_data']) ,
                 'items' => json_encode($data['items']) ,
                 'status' => 'pending',  // تعيين الحالة الافتراضية
+                'commission_paid'=>'false'
             ]);
            $user= User::where('id',$data['userId'])
                ->where('code',null)->first();
@@ -259,7 +260,8 @@ class PaymobController extends Controller
             // Validate data before saving it
             $data = $request->all();
             $data['payment_method'] = 'cash_on_delivery';
-            $data['status'] = 'pending'; // الحالة الافتراضية عند الطلب
+            $data['status'] = 'cash_on_delivery'; // الحالة الافتراضية عند الطلب
+            $data['commission_paid'] = 'false'; // الحالة الافتراضية عند الطلب
 
             // حفظ الطلب في قاعدة البيانات
             $order = Orders::create([
@@ -276,6 +278,7 @@ class PaymobController extends Controller
                 'items' => json_encode($data['items']),
                 'payment_method' => $data['payment_method'],
                 'status' => $data['status'],
+                'commission_paid'=> $data['commission_paid'] ,
             ]);
             $user= User::where('id',$data['userId'])
                 ->where('code',null)->first();
