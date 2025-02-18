@@ -67,6 +67,7 @@ class CartController extends Controller
                         'desc_' . $local . ' as desc',
                         'image',
                         'price_discount',
+                        'stock',
                     );
                 }
             ])->where('user_id', auth()->id())

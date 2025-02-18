@@ -176,6 +176,19 @@ class AdminController extends Controller
         }
     }
 
+
+    public function showSales()
+    {
+        try
+        {
+            $users = Admin::where('type','sales')->latest()->get();
+            return $this->ReturnData('admin', $users, '');
+        }
+        catch (\Exception $ex){
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+
+        }
+    }
     public function showByType($type)
     {
         try {

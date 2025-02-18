@@ -57,13 +57,13 @@ class CommissionController extends Controller
             }
 
             // جلب العمولات المسحوبة في نفس الشهر
-            $lastWithdrawal = Commissions::where('admin_id', $adminId)
-                ->whereMonth('withdraw_date', now()->month) // نفس الشهر
-                ->exists();
-
-            if ($lastWithdrawal) {
-                return $this->ReturnError('400', __('message.withdrawalAlreadyDone'));
-            }
+//            $lastWithdrawal = Commissions::where('admin_id', $adminId)
+//                ->whereMonth('withdraw_date', now()->month) // نفس الشهر
+//                ->exists();
+//
+//            if ($lastWithdrawal) {
+//                return $this->ReturnError('400', __('message.withdrawalAlreadyDone'));
+//            }
 
             // جلب الطلبات التي لم تُحسب عمولتها
             $orders = Orders::where('code_user', $admin->code)
@@ -87,6 +87,7 @@ class CommissionController extends Controller
 
             // تحديث الطلبات إلى عمولة محسوبة
             Orders::where('code_user', $admin->code)->update(['commission_paid' => 'true']);
+
 //            $orders->chunk(100, function($orders) {
 //                foreach ($orders as $order) {
 //                    $order->update(['commission_paid' => 'true']);
@@ -114,6 +115,7 @@ class CommissionController extends Controller
 
             // تحديث حالة العمولة
             $commission->update(['status' => 'paid']);
+
 
             return $this->ReturnSuccess(200, __('message.updated'));
         }
@@ -199,7 +201,7 @@ class CommissionController extends Controller
             $query = Commissions::query();
 
             // البحث حسب الـ status
-            if ($request->has('status')) {
+            if ($request->has('status') && $request->status !== 'all') {
                 $query->where('status', $request->status);
             }
 
@@ -209,7 +211,7 @@ class CommissionController extends Controller
             }
 
             // استرجاع العمولات بناءً على المعايير
-            $commissions = $query->with(['sales'])->latest()->paginate(pag);
+            $commissions = $query->with(['sales'])->latest()->get();
 
 
             return $this->ReturnData('commissions', $commissions, '');
@@ -221,17 +223,28 @@ class CommissionController extends Controller
     }
 
     public function show()
-{
-    try
     {
-       $commission= Commissions::with(['sales'])->latest()->paginate(pag);
-       return $this->ReturnData('commission',$commission,'');
+        try
+        {
+           $commission= Commissions::with(['sales'])->latest()->paginate(pag);
+           return $this->ReturnData('commission',$commission,'');
+        }
+        catch (\Exception $ex)
+        {
+            return $this->ReturnError($ex->getCode(),$ex->getMessage());
+        }
     }
-    catch (\Exception $ex)
-    {
-        return $this->ReturnError($ex->getCode(),$ex->getMessage());
+
+    public function showByCode($code){
+        try
+        {
+            $orders= Orders::where('code_user',$code)
+              ->where('commission_paid','false')->paginate(pag);
+            return $this->ReturnData('orders',$orders,"");
+        }catch (\Exception $ex){
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
     }
-}
 
 
 }

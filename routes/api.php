@@ -147,6 +147,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         Route::post('updatePassword',[AdminController::class,'updatePassword'])->middleware('auth:admin');
         Route::get('singleUser/{id}',[AdminController::class,'singleUser']);
         Route::get('showAll',[AdminController::class,'showAll']);
+        Route::get('showSales',[AdminController::class,'showSales']);
         Route::get('showByType/{type}',[AdminController::class,'showByType']);
         Route::get('delete/{id}',[AdminController::class,'delete']);
         Route::get('getDashboardStats',[AdminController::class,'getDashboardStats']);
@@ -291,6 +292,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::post('/search', [CommissionController::class, 'searchCommissions']);
             // عرض العمولات
             Route::get('/show', [CommissionController::class, 'show']);
+            Route::get('/showByCode/{code}', [CommissionController::class, 'showByCode']);
         });
 
 
