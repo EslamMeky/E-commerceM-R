@@ -24,7 +24,10 @@ use App\Http\Controllers\Api\WhyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-const pag=10;
+//const pag=10;
+if (!defined('pag')) {
+    define('pag', 10);
+}
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -207,7 +210,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         });
         ///////////////////////// subscribe //////////
         Route::group(['prefix'=>'subscribe'],function (){
-            Route::get('/', [SubscribeController::class, 'index']); // عرض جميع السجلات
+            Route::get('/show', [SubscribeController::class, 'index']); // عرض جميع السجلات
             Route::post('/save', [SubscribeController::class, 'save']); // إنشاء سجل جديد
 
         });
@@ -217,7 +220,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         Route::group(['prefix'=>'why'],function (){
             Route::post('save',[WhyController::class,'save']);
             Route::post('update/{id}',[WhyController::class,'update']);
-            Route::get('/',[WhyController::class,'index']);
+            Route::get('/show',[WhyController::class,'index']);
             Route::get('/showAll',[WhyController::class,'showAll']);
             Route::get('delete/{id}',[WhyController::class,'delete']);
 
@@ -229,7 +232,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
         Route::group(['prefix'=>'feature'],function (){
             Route::post('save',[FeatureController::class,'save']);
             Route::post('update/{id}',[FeatureController::class,'update']);
-            Route::get('/',[FeatureController::class,'index']);
+            Route::get('/show',[FeatureController::class,'index']);
             Route::get('/showAll',[FeatureController::class,'showAll']);
             Route::get('delete/{id}',[FeatureController::class,'delete']);
 
