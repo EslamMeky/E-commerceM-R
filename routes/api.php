@@ -86,6 +86,7 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
             Route::get('singleProduct/{product_id}',[ProductController::class,'singleProductWithRelated']);
             Route::get('allProducts',[ProductController::class,'allProducts']);
             Route::get('showAll',[ProductController::class,'showAll']);
+            Route::get('showAllwithoutpag',[ProductController::class,'showAllwithoutpag']);
             Route::get('showOutOfStock',[ProductController::class,'showOutOfStock']);
             Route::post('update/{product_id}',[ProductController::class,'update']);
             Route::get('delete/{product_id}',[ProductController::class,'delete']);
@@ -190,9 +191,9 @@ Route::group(['middleware'=>['check.pass','check.lang']],function (){
 
         });
 
-        //////////////////  cash Back /////////////
+        /////////////////  cash Back /////////////
         Route::group(['prefix'=>'cashBack'],function (){
-            Route::get('/', [CachBackController::class, 'index']); // عرض جميع السجلات
+            Route::get('/show', [CachBackController::class, 'index']); // عرض جميع السجلات
             Route::post('/store', [CachBackController::class, 'store']); // إنشاء سجل جديد
             Route::get('/edit/{id}', [CachBackController::class, 'edit']); // عرض سجل واحد
             Route::post('/update/{id}', [CachBackController::class, 'update']); // تحديث سجل

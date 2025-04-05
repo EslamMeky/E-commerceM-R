@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\GeneralTrait;
+use App\Mail\NewOrderMail;
+use App\Mail\NewProductMail;
 use App\Mail\OrderPaidMail;
 use App\Models\Cart;
 use App\Models\Orders;
@@ -227,6 +229,8 @@ class PaymobController extends Controller
                 if (is_array($shippingData) && !empty($shippingData['email'])) {
                     Mail::to($shippingData['email'])->send(new OrderPaidMail($order));
                 }
+                $adminEmail = 'eslammeky111@gmail.com';
+                Mail::to($adminEmail)->send(new NewOrderMail($order));
             }
 
             return redirect()->route('payment.success');
@@ -310,6 +314,8 @@ class PaymobController extends Controller
             if (is_array($shippingData) && !empty($shippingData['email'])) {
                 Mail::to($shippingData['email'])->send(new OrderPaidMail($order));
             }
+            $adminEmail = 'eslammeky111@gmail.com';
+            Mail::to($adminEmail)->send(new NewOrderMail($order));
             return $this->ReturnSuccess(200,__('message.saved'));
         } catch (\Exception $ex) {
             return $this->ReturnError($ex->getCode(), $ex->getMessage());

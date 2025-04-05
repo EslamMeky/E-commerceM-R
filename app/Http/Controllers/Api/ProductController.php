@@ -319,6 +319,31 @@ class ProductController extends Controller
         }
     }
 
+    public function showAllwithoutpag()
+    {
+        try {
+
+
+            $products = Products::with(['category' ])->latest()->get();
+
+            // تحويل الصور الإضافية والألوان والمقاسات إلى Arrays لكل منتج
+            foreach ($products as $product) {
+                // إذا كانت الصور الإضافية موجودة، تحويلها من JSON إلى Array
+                if ($product->OtherImage) {
+                    $product->OtherImage = $product->OtherImage; // إذا كانت مخزنة كـ Array
+                }
+
+                // تحويل الألوان والمقاسات إلى Arrays
+                $product->colors = $product->colors; // الألوان كـ Array
+                $product->sizes = $product->sizes; // المقاسات كـ Array
+            }
+
+            return $this->ReturnData('products', $products, '');
+        } catch (\Exception $ex) {
+            return $this->ReturnError($ex->getCode(), $ex->getMessage());
+        }
+    }
+
     public function update(Request $request, $product_id)
     {
         try {
